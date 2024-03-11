@@ -17,6 +17,11 @@ lint = true
 capabilities = "CAPABILITY_IAM"
 confirm_changeset = true
 resolve_s3 = true
+s3_prefix = "limited-chat-app"
+region = "ap-northeast-1"
+profile = "limited-chat-dev"
+image_repositories = []
+disable_rollback = true
 
 [default.package.parameters]
 resolve_s3 = true
