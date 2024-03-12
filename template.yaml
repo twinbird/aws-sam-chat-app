@@ -38,6 +38,32 @@ Resources:
         External:
           - "@aws-sdk/lib-dynamodb"
           - "@aws-sdk/client-dynamodb"
+  ListMessagesFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: list-messages/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Policies: AmazonDynamoDBFullAccess
+      Architectures:
+        - x86_64
+      Events:
+        PostMessage:
+          Type: Api 
+          Properties:
+            Path: /listMessages
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - app.ts
+        External:
+          - "@aws-sdk/lib-dynamodb"
+          - "@aws-sdk/client-dynamodb"
   ChatTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -65,3 +91,12 @@ Outputs:
   PostMessageFunctionIamRole:
     Description: "Implicit IAM Role created for Post Message function"
     Value: !GetAtt PostMessageFunctionRole.Arn
+  ListMessagesApi:
+    Description: "API Gateway endpoint URL for Prod stage for ListMessages function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/listMessages/"
+  ListMessageFunction:
+    Description: "List Messages Lambda Function ARN"
+    Value: !GetAtt ListMessagesFunction.Arn
+  ListMessagesFunctionIamRole:
+    Description: "Implicit IAM Role created for List Messages function"
+    Value: !GetAtt ListMessagesFunctionRole.Arn
