@@ -47,20 +47,21 @@ const fetchPosts = async (): [Post] => {
     TableName: 'ChatTable',
   });
   const data = await docClient.send(command);
-  console.log(data);
-  return data.Items.map((m) => {
+  const mapped = data.Items.map((m) => {
     return {
       createdAt: m.createdAt,
       message: m.message,
     };
   });
+  return mapped.sort((a, b) => {
+    const aday = new Date(a);
+    const bday = new Date(b);
+    return bday.getTime() - aday.getTime();
+  });
 }
 
 /**
  * メッセージ取得API
- *
- * Request Bodyに以下の形式のJSONが含まれることを期待します。
- * { message: 'チャット投稿用メッセージ' }
  */
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   try {
