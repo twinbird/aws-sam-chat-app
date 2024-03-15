@@ -29,28 +29,31 @@ const successResponse = (): Response => {
 };
 
 /*
- * 削除対象の古い投稿ならtrue
+ * baseDateからmillisec前のdateオブジェクトを返す
  */
-const isExpired = (baseDate: Date, date: Date) => {
-  const limitMilliSeconds = 10 * 60 * 1000; // 10分をミリ秒に変換
-  const diffInMilliseconds = baseDate.getTime() - date.getTime();
+const beforeMillisec = (baseDate: Date, millisec: number): Date => {
+  const t = baseDate.getTime() - millisec;
+  const d = new Date();
+  d.setTime(t);
 
-  return diffInMilliseconds >= limitMilliSeconds;
+  return d;
 };
 
 /**
  * 投稿から10分以上経過したメッセージをデータベースから取り出す
  */
 const fetchOldPosts = async (): [Post] => {
+  const now = new Date();
+  const condDate = beforeMillisec(now, 10 * 60 * 1000);
   const command = new ScanCommand({
     TableName: 'ChatTable',
+    FilterExpression: "createdAt < :d",
+    ExpressionAttributeValues: {
+      ":d": condDate.toISOString(),
+    },
   });
-  const now = new Date();
   const data = await docClient.send(command);
-  return data.Items.filter((d) => {
-    const createdDate = new Date(d.createdAt)
-    return isExpired(now, createdDate);
-  });
+  return data.Items;
 };
 
 /**
@@ -84,5 +87,4 @@ export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGat
   await deletePosts(posts);
   return successResponse();
 };
-
 

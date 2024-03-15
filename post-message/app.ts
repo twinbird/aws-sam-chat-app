@@ -30,7 +30,7 @@ const storePost = async (message: string): string => {
 
   const uuid = crypto.randomUUID();
   const now = new Date();
-  const createdAt = now.toLocaleString('ja-JP', { timeZone: 'UTC' });
+  const createdAt = now.toISOString();
 
   const command = new PutItemCommand({
     TableName: 'ChatTable',
