@@ -64,6 +64,26 @@ Resources:
         External:
           - "@aws-sdk/lib-dynamodb"
           - "@aws-sdk/client-dynamodb"
+  DeleteOldMessagesFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: delete-old-messages/
+      Handler: app.lambdaHandler
+      Runtime: nodejs20.x
+      Policies: AmazonDynamoDBFullAccess
+      Architectures:
+        - x86_64
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints: 
+        - app.ts
+        External:
+          - "@aws-sdk/lib-dynamodb"
+          - "@aws-sdk/client-dynamodb"
   ChatTable:
     Type: AWS::DynamoDB::Table
     Properties:
