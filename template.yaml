@@ -73,6 +73,14 @@ Resources:
       Policies: AmazonDynamoDBFullAccess
       Architectures:
         - x86_64
+      Events:
+        ScheduledFunction:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0/10 * * * ? *)
+            ScheduleExpressionTimezone: "Asia/Tokyo"
+            State: ENABLED
+            Name: limited-chat-app-delete-old-messages-function-schedule
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
