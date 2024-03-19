@@ -9,7 +9,7 @@ Description: >
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 60
 
 Resources:
   PostMessageApi:
@@ -115,8 +115,8 @@ Resources:
         - AttributeName: uuid
           KeyType: HASH
       ProvisionedThroughput:
-        ReadCapacityUnits: 10
-        WriteCapacityUnits: 10
+        ReadCapacityUnits: 25
+        WriteCapacityUnits: 25
   LimitedChatAppApiWebAcl:
     Type: AWS::WAFv2::WebACL
     Properties:

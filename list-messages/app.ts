@@ -43,11 +43,26 @@ const errorResponse = (): Response => {
 const fetchPosts = async (): [Post] => {
   const client = new DynamoDBClient({});
   const docClient = DynamoDBDocumentClient.from(client);
-  const command = new ScanCommand({
-    TableName: 'ChatTable',
-  });
-  const data = await docClient.send(command);
-  const mapped = data.Items.map((m) => {
+
+  let data = [];
+  const getChunk = async (key: string): string => {
+    const command = new ScanCommand({
+      TableName: 'ChatTable',
+      Limit: 10,
+      ExclusiveStartKey: key,
+    });
+    const result = await docClient.send(command);
+    data.push(...result.Items);
+
+    return result.LastEvaluatedKey;
+  };
+
+  let key;
+  do {
+    key = await getChunk(key);
+  } while (key);
+
+  const mapped = data.map((m) => {
     return {
       createdAt: m.createdAt,
       message: m.message,
@@ -58,7 +73,7 @@ const fetchPosts = async (): [Post] => {
     const bday = new Date(b);
     return bday.getTime() - aday.getTime();
   });
-}
+};
 
 /**
  * メッセージ取得API
