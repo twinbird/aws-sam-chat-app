@@ -12,8 +12,12 @@ Globals:
     Timeout: 3
 
 Resources:
+  PostMessageApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
   PostMessageFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function 
     Properties:
       CodeUri: post-message/
       Handler: app.lambdaHandler
@@ -23,10 +27,12 @@ Resources:
         - x86_64
       Events:
         PostMessage:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /postMessage
             Method: post
+            RestApiId:
+              Ref: PostMessageApi
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -38,6 +44,10 @@ Resources:
         External:
           - "@aws-sdk/lib-dynamodb"
           - "@aws-sdk/client-dynamodb"
+  ListMessagesApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
   ListMessagesFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -53,6 +63,8 @@ Resources:
           Properties:
             Path: /listMessages
             Method: get
+            RestApiId:
+              Ref: ListMessagesApi
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -105,23 +117,56 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 10
         WriteCapacityUnits: 10
+  LimitedChatAppApiWebAcl:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      DefaultAction:
+        Allow: {}
+      Scope: REGIONAL
+      Rules:
+        - Action:
+            Block: {}
+          Name: rate-limit-rule-100-request-per-5-minutes
+          Priority: 0
+          Statement:
+            RateBasedStatement:
+              Limit: 100
+              AggregateKeyType: IP
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: false
+            MetricName: rate-limit-rule-100-request-per-5-minutes
+      VisibilityConfig:
+        SampledRequestsEnabled: true
+        CloudWatchMetricsEnabled: true
+        MetricName: limited-chat-app-waf-acl
+  PostApiWebAclLimitedChatAppAssociations:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      WebACLArn: !GetAtt LimitedChatAppApiWebAcl.Arn
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${PostMessageApi}/stages/Prod'
+  ListApiWebAclLimitedChatAppAssociations:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties:
+      WebACLArn: !GetAtt LimitedChatAppApiWebAcl.Arn
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${ListMessagesApi}/stages/Prod'
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  PostMessageApi:
+  PostMessageApiUrl:
     Description: "API Gateway endpoint URL for Prod stage for PostMessage function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/postMessage/"
+    Value: !Sub "https://${PostMessageApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/postMessage/"
   PostMessageFunction:
     Description: "Post Message Lambda Function ARN"
     Value: !GetAtt PostMessageFunction.Arn
   PostMessageFunctionIamRole:
     Description: "Implicit IAM Role created for Post Message function"
     Value: !GetAtt PostMessageFunctionRole.Arn
-  ListMessagesApi:
+  ListMessagesApiUrl:
     Description: "API Gateway endpoint URL for Prod stage for ListMessages function"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/listMessages/"
+    Value: !Sub "https://${ListMessagesApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/listMessages/"
   ListMessageFunction:
     Description: "List Messages Lambda Function ARN"
     Value: !GetAtt ListMessagesFunction.Arn
