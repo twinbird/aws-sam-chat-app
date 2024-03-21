@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand } from "@aws-sdk/lib-dynamodb";
 
 interface Response {
@@ -42,7 +42,10 @@ const errorResponse = (): Response => {
  * メッセージをデータベースから取り出す
  */
 const fetchPosts = async (): [Post] => {
-  const client = new DynamoDBClient({});
+  const config: DynamoDBClientConfig = {
+    endpoint: process.env.DYNAMODB_ENDPOINT,
+  };
+  const client = new DynamoDBClient(process.env.DYNAMODB_ENDPOINT ? config : {});
   const docClient = DynamoDBDocumentClient.from(client);
 
   let data = [];

@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, ScanCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 
 interface Response {
@@ -13,7 +13,10 @@ interface Post {
   message: string;
 }
 
-const client = new DynamoDBClient({});
+const config: DynamoDBClientConfig = {
+  endpoint: process.env.DYNAMODB_ENDPOINT,
+};
+const client = new DynamoDBClient(process.env.DYNAMODB_ENDPOINT ? config : {});
 const docClient = DynamoDBDocumentClient.from(client);
 
 /**

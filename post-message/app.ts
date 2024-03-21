@@ -1,5 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { PutItemCommand, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { PutItemCommand, DynamoDBClient, DynamoDBClientConfig } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import crypto from 'crypto';
 
@@ -25,7 +25,10 @@ const getPostMessage = (event: APIGatewayProxyEvent): string => {
  * メッセージをデータベースへ保存する
  */
 const storePost = async (message: string): string => {
-  const client = new DynamoDBClient({});
+  const config: DynamoDBClientConfig = {
+    endpoint: process.env.DYNAMODB_ENDPOINT,
+  };
+  const client = new DynamoDBClient(process.env.DYNAMODB_ENDPOINT ? config : {});
   const docClient = DynamoDBDocumentClient.from(client);
 
   const uuid = crypto.randomUUID();

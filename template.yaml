@@ -17,6 +17,8 @@ Globals:
 Parameters:
   Secret:
     Type: String
+  DynamoDbEndpoint:
+    Type: String
 
 Resources:
   PostMessageApi:
@@ -32,6 +34,9 @@ Resources:
       Policies: AmazonDynamoDBFullAccess
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          DYNAMODB_ENDPOINT: !Ref DynamoDbEndpoint
       Events:
         PostMessage:
           Type: Api
@@ -67,6 +72,7 @@ Resources:
       Environment:
         Variables:
           SECRET: !Ref Secret
+          DYNAMODB_ENDPOINT: !Ref DynamoDbEndpoint
       Events:
         PostMessage:
           Type: Api 
@@ -95,6 +101,9 @@ Resources:
       Policies: AmazonDynamoDBFullAccess
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          DYNAMODB_ENDPOINT: !Ref DynamoDbEndpoint
       Events:
         ScheduledFunction:
           Type: ScheduleV2
