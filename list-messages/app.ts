@@ -21,6 +21,7 @@ const successResponse = (posts: [Post]): Response => {
     body: JSON.stringify({
       message: 'success',
       posts: posts,
+      secret: process.env.SECRET,
     }),
   };
 };

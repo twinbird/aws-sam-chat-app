@@ -13,6 +13,11 @@ Globals:
   Api:
     OpenApiVersion: 3.0.2
 
+# 環境変数用に用意
+Parameters:
+  Secret:
+    Type: String
+
 Resources:
   PostMessageApi:
     Type: AWS::Serverless::Api
@@ -59,6 +64,9 @@ Resources:
       Policies: AmazonDynamoDBFullAccess
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          SECRET: !Ref Secret
       Events:
         PostMessage:
           Type: Api 
