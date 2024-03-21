@@ -10,6 +10,8 @@ Description: >
 Globals:
   Function:
     Timeout: 60
+  Api:
+    OpenApiVersion: 3.0.2
 
 Resources:
   PostMessageApi:
