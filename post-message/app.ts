@@ -13,7 +13,7 @@ interface Response {
  */
 const getPostMessage = (event: APIGatewayProxyEvent): string => {
   try {
-    const body = JSON.parse(event.body);
+    const body = JSON.parse(event.body ?? '');
     return body.message;
   } catch (err) {
     console.log(err);
@@ -24,7 +24,7 @@ const getPostMessage = (event: APIGatewayProxyEvent): string => {
 /**
  * メッセージをデータベースへ保存する
  */
-const storePost = async (message: string): string => {
+const storePost = async (message: string): Promise<string> => {
   const config: DynamoDBClientConfig = {
     endpoint: process.env.DYNAMODB_ENDPOINT,
   };
