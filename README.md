@@ -24,5 +24,5 @@ sam deploy --profile limited-chat-dev --parameter-overrides='Secret="THIS_IS_A_S
 
 ```
 cd post-message
-npm run test
+AWS_PROFILE="limited-chat-dev" API_URL="xxxxxxx/Prod" npm run test
 ```
