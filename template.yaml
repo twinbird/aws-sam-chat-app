@@ -161,11 +161,13 @@ Resources:
         MetricName: limited-chat-app-waf-acl
   PostApiWebAclLimitedChatAppAssociations:
     Type: AWS::WAFv2::WebACLAssociation
+    DependsOn: PostMessageApiProdStage
     Properties:
       WebACLArn: !GetAtt LimitedChatAppApiWebAcl.Arn
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${PostMessageApi}/stages/Prod'
   ListApiWebAclLimitedChatAppAssociations:
     Type: AWS::WAFv2::WebACLAssociation
+    DependsOn: ListMessagesApiProdStage
     Properties:
       WebACLArn: !GetAtt LimitedChatAppApiWebAcl.Arn
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${ListMessagesApi}/stages/Prod'
